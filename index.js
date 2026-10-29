@@ -5,6 +5,7 @@ const { criarPool } = require('./src/db');
 const { criarApp } = require('./src/app');
 
 const app = express();
+app.get('/', (req, res) => res.redirect(302, '/index.html'));
 app.use(criarApp(criarPool())); // o pool é criado uma vez por instância e reaproveitado entre requisições
 
 module.exports = app;
