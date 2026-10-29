@@ -1,0 +1,81 @@
+### Exemplos de chamadas — use a extensão "REST Client" no VS Code
+@host = http://localhost:3000/api
+
+### Saúde da API
+GET {{host}}/health
+
+### Perguntas do teste vocacional
+GET {{host}}/quiz/perguntas
+
+### Enviar respostas (ajuste os ids conforme o GET acima)
+POST {{host}}/quiz/respostas
+Content-Type: application/json
+
+{
+  "respostas": [
+    { "pergunta_id": 1, "opcao_id": 1 },
+    { "pergunta_id": 2, "opcao_id": 6 },
+    { "pergunta_id": 3, "opcao_id": 11 },
+    { "pergunta_id": 4, "opcao_id": 16 },
+    { "pergunta_id": 5, "opcao_id": 21 },
+    { "pergunta_id": 6, "opcao_id": 26 }
+  ]
+}
+
+### Comparar carreiras
+GET {{host}}/carreiras/comparar?slugs=eng-software,medicina,design
+
+### Cursos gratuitos na região Norte
+GET {{host}}/cursos?regiao=norte&gratuito=true
+
+### Recomendação por perfil, estado e orçamento
+POST {{host}}/recomendacoes
+Content-Type: application/json
+
+{
+  "pontuacao": { "exatas": 4, "saude": 1, "criativas": 1, "negocios": 0, "humanas": 0 },
+  "uf": "AM",
+  "orcamento_max": 600,
+  "limite": 5
+}
+
+### Cadastro de aluno (entra na turma de demonstração)
+# @name registroAluno
+POST {{host}}/auth/registro
+Content-Type: application/json
+
+{
+  "nome": "Ana Souza",
+  "email": "ana@exemplo.com",
+  "senha": "senhaSegura123",
+  "papel": "aluno",
+  "codigo_turma": "TURMA3A-DEMO"
+}
+
+### Cadastro de orientador
+# @name registroOrientador
+POST {{host}}/auth/registro
+Content-Type: application/json
+
+{
+  "nome": "Prof. Raul",
+  "email": "raul@escola.com",
+  "senha": "senhaSegura123",
+  "papel": "orientador",
+  "codigo_escola": "ORIENTADOR-DEMO"
+}
+
+### Último resultado do aluno logado
+GET {{host}}/quiz/resultado
+Authorization: Bearer {{registroAluno.response.body.token}}
+
+### Painel do orientador (turma inteira ou escola)
+GET {{host}}/orientador/resumo
+Authorization: Bearer {{registroOrientador.response.body.token}}
+
+### Criar turma
+POST {{host}}/orientador/turmas
+Content-Type: application/json
+Authorization: Bearer {{registroOrientador.response.body.token}}
+
+{ "nome": "2º Ano B", "ano_letivo": 2026 }
