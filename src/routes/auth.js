@@ -12,7 +12,11 @@ const registroSchema = z.object({
   papel: z.enum(['aluno', 'orientador']),
   codigo_turma: z.string().trim().max(40).optional(), // aluno (opcional)
   codigo_escola: z.string().trim().max(40).optional(), // orientador (obrigatório)
+  // aluno autoriza o orientador da escola a ver suas notas e respostas (menores: com anuência do responsável)
+  consentimento_orientador: z.boolean().optional(),
 });
+
+const consentimentoSchema = z.object({ consentimento_orientador: z.boolean() });
 
 const loginSchema = z.object({
   email: z.string().trim().email().max(160),
@@ -24,6 +28,7 @@ const HASH_FALSO = bcrypt.hashSync('senha-qualquer', 4);
 
 const publico = (u) => ({
   id: u.id, nome: u.nome, email: u.email, papel: u.papel, escola_id: u.escola_id, turma_id: u.turma_id,
+  consentimento_orientador: Boolean(u.consentimento_orientador),
 });
 
 module.exports = (pool) => {
@@ -50,10 +55,11 @@ module.exports = (pool) => {
     const senhaHash = await bcrypt.hash(dados.senha, config.bcryptRounds);
     // E-mail repetido dispara o erro 23505, tratado como 409 no handler global.
     const { rows } = await pool.query(
-      `INSERT INTO usuarios (nome, email, senha_hash, papel, escola_id, turma_id)
-       VALUES ($1, $2, $3, $4, $5, $6)
-       RETURNING id, nome, email, papel, escola_id, turma_id`,
-      [dados.nome, email, senhaHash, dados.papel, escolaId, turmaId]
+      `INSERT INTO usuarios (nome, email, senha_hash, papel, escola_id, turma_id, consentimento_orientador, consentimento_em)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, CASE WHEN $7 THEN now() END)
+       RETURNING id, nome, email, papel, escola_id, turma_id, consentimento_orientador`,
+      [dados.nome, email, senhaHash, dados.papel, escolaId, turmaId,
+       dados.papel === 'aluno' && dados.consentimento_orientador === true && Boolean(turmaId)]
     );
     res.status(201).json({ token: gerarToken(rows[0]), usuario: publico(rows[0]) });
   });
@@ -69,7 +75,7 @@ module.exports = (pool) => {
 
   router.get('/me', autenticar, async (req, res) => {
     const { rows } = await pool.query(
-      `SELECT u.id, u.nome, u.email, u.papel, u.escola_id, u.turma_id,
+      `SELECT u.id, u.nome, u.email, u.papel, u.escola_id, u.turma_id, u.consentimento_orientador,
               t.nome AS turma_nome, e.nome AS escola_nome
        FROM usuarios u
        LEFT JOIN turmas t ON t.id = u.turma_id
@@ -78,6 +84,17 @@ module.exports = (pool) => {
       [req.usuario.id]
     );
     if (!rows.length) throw new AppError(401, 'Usuário não encontrado.');
+    res.json(rows[0]);
+  });
+
+  // O aluno pode dar ou retirar a autorização a qualquer momento (ao retirar, o orientador perde o acesso na hora).
+  router.patch('/consentimento', autenticar, async (req, res) => {
+    if (req.usuario.papel !== 'aluno') throw new AppError(403, 'Apenas alunos têm essa opção.');
+    const { consentimento_orientador: valor } = validar(consentimentoSchema, req.body);
+    if (valor && !req.usuario.turmaId) throw new AppError(400, 'Entre em uma turma (com o código do orientador) para autorizar.');
+    const { rows } = await pool.query(
+      `UPDATE usuarios SET consentimento_orientador = $2, consentimento_em = CASE WHEN $2 THEN now() ELSE NULL END
+       WHERE id = $1 RETURNING consentimento_orientador`, [req.usuario.id, valor]);
     res.json(rows[0]);
   });
 
