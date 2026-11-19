@@ -19,7 +19,7 @@ module.exports = {
   jwtExpiraEm: env.JWT_EXPIRES_IN || '8h',
   corsOrigin: env.CORS_ORIGIN || '*', // em produção: URL do front-end (ex.: https://orienta-plus.vercel.app)
   bcryptRounds: emTeste ? 4 : 10,
-  limiteAuth: emTeste ? 10000 : 20, // tentativas de login/cadastro por IP a cada 15 min
+  limiteAuth: emTeste ? 10000 : 50, // tentativas FALHAS de login/cadastro por IP a cada 15 min (escolas compartilham IP)
   // Painel do orientador: abaixo desse nº de alunos com teste, os agregados são ocultados
   // para não permitir identificar respostas individuais (LGPD — dados de menores).
   minGrupoAgregado: Number(env.MIN_GRUPO_AGREGADO ?? 3),
