@@ -11,7 +11,7 @@ Stack do pré-projeto: **Node.js + Express + PostgreSQL**, com deploy na Vercel 
 | **Carreiras** | Rotina real, faixa salarial, situação do mercado e formação; **comparação lado a lado** de até 3 carreiras |
 | **Cursos** | Busca de cursos técnicos e superiores por região, estado, orçamento, modalidade e área |
 | **Recomendação** | Ranking de cursos que cruza perfil + orçamento + localização + mercado, com os **motivos** de cada sugestão |
-| **Orientador** | Painel com dados **agregados** da turma/escola (distribuição de interesses, sugestões de ações) |
+| **Orientador** | Painel com turmas (código gerado), lista de alunos, **notas por bimestre**, respostas do questionário e leitura cruzada notas × perfil — individual só para quem autorizou; agregados da turma com mínimo de 3 alunos |
 | **Auth** | Cadastro/login com JWT; papéis `aluno` e `orientador` |
 
 ## Rodando localmente
@@ -40,7 +40,7 @@ createdb orienta_test
 TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/orienta_test npm test
 ```
 
-São 29 testes (pontuação, recomendação e integração da API). O nome do banco de teste **precisa conter "test"**:
+São 46 testes (pontuação, recomendação, análise de notas, painel do orientador e integração da API). O nome do banco de teste **precisa conter "test"**:
 a suíte apaga usuários, turmas e escolas ao iniciar e se recusa a rodar em outro banco.
 
 ## Endpoints
@@ -64,7 +64,14 @@ Erros seguem o formato `{ "erro": "mensagem", "detalhes": ... }`. Rotas protegid
 | POST | `/api/recomendacoes` | público* | Ranking de cursos. *Sem `pontuacao`, usa o último teste do aluno logado |
 | GET | `/api/orientador/turmas` | orientador | Turmas da escola, com códigos de acesso |
 | POST | `/api/orientador/turmas` | orientador | Cria turma (`nome`, `ano_letivo`) |
-| GET | `/api/orientador/resumo?turma_id=` | orientador | Painel agregado da turma (ou da escola inteira, sem `turma_id`) |
+| POST | `/api/orientador/turmas/:id/novo-codigo` | orientador | Gera novo código de acesso da turma |
+| GET | `/api/orientador/turmas/:id/alunos` | orientador | Alunos da turma (sem autorização: só o nome) |
+| GET | `/api/orientador/alunos/:id` | orientador | Ficha: teste com respostas, notas e análise. **403 se o aluno não autorizou** |
+| PUT | `/api/orientador/alunos/:id/notas` | orientador | Lança/corrige notas de um bimestre (`periodo` 1–4, `notas: [{disciplina, nota}]`) |
+| DELETE | `/api/orientador/alunos/:id/notas?disciplina=&periodo=` | orientador | Remove uma nota |
+| GET | `/api/orientador/disciplinas` | orientador | Disciplinas aceitas |
+| GET | `/api/orientador/resumo?turma_id=` | orientador | Painel agregado da turma (interesses + notas); sem `turma_id`, a escola inteira |
+| PATCH | `/api/auth/consentimento` | aluno | Dá ou retira a autorização para o orientador ver notas e respostas |
 
 ### Como a recomendação funciona
 
@@ -146,7 +153,18 @@ e depois a página inicial.
 - Escolha, em Settings → Functions, uma região próxima ao seu projeto Supabase.
 - Em produção **não** use `SEED_DEMO=true`: crie as escolas reais com códigos próprios.
 
+## Painel do orientador
+
+1. A escola precisa existir no banco, com um **código de orientador** (`db/criar-escola.sql`). O orientador cria a conta com esse código.
+2. No painel, ele cria turmas; cada turma recebe um **código de acesso** (`T-XXXXXXXX`) que pode ser trocado a qualquer momento.
+3. O aluno cria a conta informando o código da turma e, se quiser, **autoriza** o orientador a ver suas notas e respostas. Ele pode retirar a autorização em “Minha conta”.
+4. O orientador lança as notas por bimestre (13 disciplinas) e lê a análise: média, queda de desempenho, desempenho por área e cruzamento com a área do teste (`src/services/analise.js`, regras simples e ajustáveis).
+
+**Banco já existente (Supabase):** rode `db/migracao-orientador.sql` no SQL Editor **antes** de publicar o código novo.
+
 ## Segurança e privacidade (LGPD)
+- Dados individuais (notas, respostas, média) só aparecem para o orientador da **mesma escola** e **somente de alunos que autorizaram**; sem autorização ele vê apenas o nome.
+- O limite de tentativas de login conta só as **tentativas que falham** (50 por IP a cada 15 min), para não bloquear uma turma inteira na mesma rede.
 
 - Senhas com bcrypt; login com mensagem genérica e limite de tentativas por IP (`express-rate-limit`).
 - Orientador só se cadastra com o **código da escola**; só enxerga turmas da própria escola.
