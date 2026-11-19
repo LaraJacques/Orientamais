@@ -58,6 +58,9 @@ function criarApp(pool) {
     if (erro.type === 'entity.parse.failed') {
       return res.status(400).json({ erro: 'JSON inválido no corpo da requisição.' });
     }
+    if (erro.type === 'entity.too.large') {
+      return res.status(413).json({ erro: 'Requisição grande demais.' });
+    }
     if (erro.code === '23505') { // violação de unicidade no Postgres (ex.: e-mail já cadastrado)
       return res.status(409).json({ erro: 'Já existe um cadastro com esses dados.' });
     }
