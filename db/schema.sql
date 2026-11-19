@@ -108,3 +108,21 @@ CREATE INDEX IF NOT EXISTS idx_carreiras_area      ON carreiras (area_id);
 CREATE INDEX IF NOT EXISTS idx_usuarios_turma      ON usuarios (turma_id);
 CREATE INDEX IF NOT EXISTS idx_usuarios_escola     ON usuarios (escola_id);
 CREATE INDEX IF NOT EXISTS idx_tentativas_usuario  ON tentativas (usuario_id, criado_em DESC);
+
+-- ===== Painel do orientador (v2) =====
+-- Autorização do aluno (e, se menor de 18, do responsável) para o orientador da escola ver notas e respostas.
+ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS consentimento_orientador BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS consentimento_em TIMESTAMPTZ;
+
+-- Notas lançadas pelo orientador, por disciplina e bimestre (uma nota por aluno/disciplina/bimestre).
+CREATE TABLE IF NOT EXISTS notas (
+  id           SERIAL PRIMARY KEY,
+  aluno_id     INT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+  disciplina   TEXT NOT NULL,
+  periodo      SMALLINT NOT NULL CHECK (periodo BETWEEN 1 AND 4),   -- bimestre
+  nota         NUMERIC(3,1) NOT NULL CHECK (nota BETWEEN 0 AND 10),
+  lancado_por  INT REFERENCES usuarios(id) ON DELETE SET NULL,
+  atualizado_em TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (aluno_id, disciplina, periodo)
+);
+CREATE INDEX IF NOT EXISTS idx_notas_aluno ON notas (aluno_id);
