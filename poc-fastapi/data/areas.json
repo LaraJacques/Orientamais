@@ -1,0 +1,22 @@
+[
+  {
+    "slug": "exatas",
+    "nome": "Exatas & Tecnologia"
+  },
+  {
+    "slug": "saude",
+    "nome": "Saúde"
+  },
+  {
+    "slug": "criativas",
+    "nome": "Criativas"
+  },
+  {
+    "slug": "negocios",
+    "nome": "Negócios"
+  },
+  {
+    "slug": "humanas",
+    "nome": "Humanas"
+  }
+]
