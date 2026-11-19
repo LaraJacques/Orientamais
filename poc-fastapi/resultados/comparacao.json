@@ -1,0 +1,46 @@
+{
+  "perfis_testados": 500,
+  "equivalencia_python_regras_x_node": {
+    "mesma_ordem_pct": 100.0,
+    "mesmas_notas_e_ordem_pct": 100.0
+  },
+  "ml_x_motor_atual_top5": {
+    "sobreposicao_media_pct": 88.1,
+    "mesmo_primeiro_pct": 43.3
+  },
+  "latencia_em_processo": {
+    "python_regras": {
+      "media_ms": 0.032,
+      "p95_ms": 0.053
+    },
+    "python_ml": {
+      "media_ms": 0.241,
+      "p95_ms": 0.322
+    },
+    "node_regras_lote_500_ms_por_perfil": 0.2048
+  },
+  "latencia_http_fastapi": {
+    "regras": {
+      "media_ms": 1.28,
+      "p95_ms": 1.68
+    },
+    "ml": {
+      "media_ms": 1.98,
+      "p95_ms": 3.12
+    }
+  },
+  "partida_fastapi_ms": 1287,
+  "memoria_fastapi_mb": 176,
+  "tamanho_dependencias_mb": {
+    "scikit-learn": 48,
+    "numpy": 43,
+    "scipy": 109,
+    "fastapi": 2
+  },
+  "tamanho_modelo_kb": 1.4,
+  "linhas_de_codigo": {
+    "node_recomendacao.js": 118,
+    "python_regras.py": 130,
+    "python_ml_mais_features.py": 227
+  }
+}
