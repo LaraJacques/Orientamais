@@ -2,7 +2,9 @@ const express = require('express');
 const { z } = require('zod');
 const { AppError, validar } = require('../errors');
 const { autenticarOpcional } = require('../middleware/auth');
+const config = require('../config');
 const { recomendarCursos } = require('../services/recomendacao');
+const { recomendarCursosML } = require('../services/recomendacao-ml');
 
 const corpoSchema = z.object({
   // pontos (ou percentuais) por área. Se omitido, usa o último teste do aluno logado.
@@ -13,6 +15,8 @@ const corpoSchema = z.object({
   modalidade: z.enum(['presencial', 'ead', 'hibrido']).optional(),
   nivel: z.enum(['tecnico', 'superior']).optional(),
   limite: z.number().int().min(1).max(30).default(10),
+  // motor de recomendação; se omitido, usa MODELO_RECOMENDACAO (padrão: regras)
+  modelo: z.enum(['regras', 'ml']).optional(),
 });
 
 module.exports = (pool) => {
@@ -54,7 +58,9 @@ module.exports = (pool) => {
       [dados.modalidade ?? null, dados.nivel ?? null]
     );
 
-    const { total_candidatos, recomendacoes } = recomendarCursos(
+    const motor = dados.modelo ?? config.modeloRecomendacao;
+    const recomendar = motor === 'ml' ? recomendarCursosML : recomendarCursos;
+    const { total_candidatos, recomendacoes } = recomendar(
       cursos,
       { pontuacao, uf: dados.uf, regiao: dados.regiao, orcamentoMax: dados.orcamento_max },
       dados.limite
@@ -62,6 +68,7 @@ module.exports = (pool) => {
 
     res.json({
       origem_do_perfil: origem,
+      motor,
       total_candidatos,
       recomendacoes,
       dica: recomendacoes.length === 0
