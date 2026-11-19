@@ -79,3 +79,29 @@ Content-Type: application/json
 Authorization: Bearer {{registroOrientador.response.body.token}}
 
 { "nome": "2º Ano B", "ano_letivo": 2026 }
+
+### ===== Painel do orientador =====
+@token = COLE_O_TOKEN_DO_ORIENTADOR
+
+### Turmas, novo código, alunos
+GET {{host}}/orientador/turmas
+Authorization: Bearer {{token}}
+
+###
+POST {{host}}/orientador/turmas/1/novo-codigo
+Authorization: Bearer {{token}}
+
+###
+GET {{host}}/orientador/turmas/1/alunos
+Authorization: Bearer {{token}}
+
+### Ficha do aluno (403 se ele não autorizou)
+GET {{host}}/orientador/alunos/2
+Authorization: Bearer {{token}}
+
+### Lançar notas do 1º bimestre
+PUT {{host}}/orientador/alunos/2/notas
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "periodo": 1, "notas": [ { "disciplina": "Matemática", "nota": 8.5 }, { "disciplina": "Biologia", "nota": 6 } ] }
