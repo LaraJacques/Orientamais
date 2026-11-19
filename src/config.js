@@ -23,4 +23,6 @@ module.exports = {
   // Painel do orientador: abaixo desse nº de alunos com teste, os agregados são ocultados
   // para não permitir identificar respostas individuais (LGPD — dados de menores).
   minGrupoAgregado: Number(env.MIN_GRUPO_AGREGADO ?? 3),
+  // Motor de recomendação de cursos: 'regras' (padrão) ou 'ml' (modelo treinado na PoC; hoje com dados simulados).
+  modeloRecomendacao: env.MODELO_RECOMENDACAO === 'ml' ? 'ml' : 'regras',
 };
