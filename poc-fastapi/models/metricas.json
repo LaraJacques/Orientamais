@@ -1,0 +1,126 @@
+{
+  "aviso": "Treino e avaliação com dados SINTÉTICOS (sem alunos reais). Valida o pipeline, não a qualidade real.",
+  "alunos_simulados": 4000,
+  "pares_aluno_curso": 40388,
+  "divisao": {
+    "treino": 2400,
+    "validacao": 800,
+    "teste": 800
+  },
+  "modelo_escolhido": "ridge",
+  "candidatos": {
+    "ridge": {
+      "ndcg_validacao": 0.9945,
+      "ganho_validacao": 0.9714,
+      "precisao_validacao": 0.6823,
+      "tempo_treino_s": 0.02
+    },
+    "random_forest": {
+      "ndcg_validacao": 0.9944,
+      "ganho_validacao": 0.9704,
+      "precisao_validacao": 0.6826,
+      "tempo_treino_s": 1.51
+    },
+    "gradient_boosting": {
+      "ndcg_validacao": 0.9946,
+      "ganho_validacao": 0.9722,
+      "precisao_validacao": 0.6831,
+      "tempo_treino_s": 2.71
+    }
+  },
+  "teste": {
+    "regras": {
+      "ndcg": 0.9902,
+      "ganho": 0.9637,
+      "precisao": 0.6701,
+      "sobreposicao_regras": 1.0
+    },
+    "similaridade": {
+      "ndcg": 0.9858,
+      "ganho": 0.935,
+      "precisao": 0.6659,
+      "sobreposicao_regras": 0.9283
+    },
+    "ml": {
+      "ndcg": 0.9945,
+      "ganho": 0.9767,
+      "precisao": 0.6766,
+      "sobreposicao_regras": 0.9244
+    }
+  },
+  "importancia_dos_atributos": [
+    [
+      "afinidade",
+      0.2163
+    ],
+    [
+      "ead",
+      0.0326
+    ],
+    [
+      "fator_regional",
+      0.0238
+    ],
+    [
+      "mercado",
+      0.0188
+    ],
+    [
+      "duracao_anos",
+      0.0166
+    ],
+    [
+      "mensalidade_mil",
+      0.0111
+    ],
+    [
+      "ranking_da_area",
+      0.0089
+    ],
+    [
+      "definicao_do_perfil",
+      0.0082
+    ],
+    [
+      "fator_orcamento",
+      0.0082
+    ],
+    [
+      "mensalidade_sobre_orcamento",
+      0.0082
+    ],
+    [
+      "nivel_tecnico",
+      0.0057
+    ],
+    [
+      "nivel_superior",
+      0.0057
+    ],
+    [
+      "publica",
+      0.0047
+    ],
+    [
+      "gratuito",
+      0.0047
+    ],
+    [
+      "hibrido",
+      0.0026
+    ],
+    [
+      "informou_orcamento",
+      0.0004
+    ],
+    [
+      "participacao_da_area",
+      0.0002
+    ],
+    [
+      "informou_uf",
+      0.0002
+    ]
+  ],
+  "tamanho_modelo_kb": 1.4
+  }
