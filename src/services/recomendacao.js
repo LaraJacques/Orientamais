@@ -115,4 +115,7 @@ function recomendarCursos(cursos, perfil, limite = 10) {
   return { total_candidatos: avaliados.length, recomendacoes: avaliados.slice(0, limite) };
 }
 
-module.exports = { recomendarCursos, normalizarAfinidades, REGIAO_POR_UF, PESOS };
+module.exports = {
+  recomendarCursos, normalizarAfinidades, REGIAO_POR_UF, PESOS,
+  fatorRegional, fatorOrcamento, fatorMercado, montarMotivos, arredondar,
+};
