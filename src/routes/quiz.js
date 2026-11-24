@@ -4,11 +4,17 @@ const { AppError, validar } = require('../errors');
 const { autenticar, autenticarOpcional, exigirPapel } = require('../middleware/auth');
 const { calcularPontuacao, montarResultado } = require('../services/pontuacao');
 
+// Modos do teste: rápido (6 perguntas), médio (15) e completo (20). São aninhados: a pergunta pertence
+// ao modo quando sua "ordem" é menor ou igual ao limite. Sem "modo", vale o rápido (comportamento original).
+const MODOS = { rapido: 6, medio: 15, completo: 20 };
+const modoSchema = z.enum(['rapido', 'medio', 'completo']).default('rapido');
+
 const respostasSchema = z.object({
   respostas: z.array(z.object({
     pergunta_id: z.number().int().positive(),
     opcao_id: z.number().int().positive(),
   })).min(1, 'Envie ao menos uma resposta'),
+  modo: modoSchema,
 });
 
 module.exports = (pool) => {
@@ -29,11 +35,14 @@ module.exports = (pool) => {
   }
 
   // As opções NÃO expõem a área: a pontuação é calculada só no servidor.
-  router.get('/perguntas', async (_req, res) => {
+  router.get('/perguntas', async (req, res) => {
+    const modo = validar(z.object({ modo: modoSchema }), { modo: req.query.modo }).modo;
     const { rows } = await pool.query(
       `SELECT p.id AS pergunta_id, p.ordem, p.texto AS pergunta, o.id AS opcao_id, o.texto AS opcao
        FROM perguntas p JOIN opcoes o ON o.pergunta_id = p.id
-       ORDER BY p.ordem, o.id`
+       WHERE p.ordem <= $1
+       ORDER BY p.ordem, o.id`,
+      [MODOS[modo]]
     );
     const porPergunta = new Map();
     for (const r of rows) {
@@ -42,12 +51,12 @@ module.exports = (pool) => {
       }
       porPergunta.get(r.pergunta_id).opcoes.push({ id: r.opcao_id, texto: r.opcao });
     }
-    res.json({ total: porPergunta.size, perguntas: [...porPergunta.values()] });
+    res.json({ modo, total: porPergunta.size, modos: MODOS, perguntas: [...porPergunta.values()] });
   });
 
   // Anônimo calcula o resultado; aluno logado também grava a tentativa (alimenta o painel do orientador).
   router.post('/respostas', autenticarOpcional, async (req, res) => {
-    const { respostas } = validar(respostasSchema, req.body);
+    const { respostas, modo } = validar(respostasSchema, req.body);
 
     const perguntaIds = respostas.map((r) => r.pergunta_id);
     if (new Set(perguntaIds).size !== perguntaIds.length) {
@@ -57,7 +66,7 @@ module.exports = (pool) => {
     const [{ rows: opcoes }, { rows: perguntas }, areas] = await Promise.all([
       pool.query(`SELECT o.id, o.pergunta_id, o.peso, a.slug AS area_slug
                   FROM opcoes o JOIN areas a ON a.id = o.area_id`),
-      pool.query('SELECT id FROM perguntas'),
+      pool.query('SELECT id FROM perguntas WHERE ordem <= $1', [MODOS[modo]]),
       carregarAreas(),
     ]);
     const opcaoPorId = new Map(opcoes.map((o) => [o.id, o]));
@@ -69,6 +78,12 @@ module.exports = (pool) => {
       }
       return opcao;
     });
+
+    // Perguntas fora do modo escolhido não são aceitas (o rápido não recebe respostas da pergunta 7, por exemplo).
+    const idsDoModo = new Set(perguntas.map((p) => p.id));
+    if (perguntaIds.some((id) => !idsDoModo.has(id))) {
+      throw new AppError(400, 'Há respostas de perguntas que não fazem parte do modo escolhido.');
+    }
 
     const respondidas = new Set(perguntaIds);
     const faltantes = perguntas.filter((p) => !respondidas.has(p.id)).map((p) => p.id);
@@ -107,6 +122,7 @@ module.exports = (pool) => {
     res.status(201).json({
       tentativa_id: tentativaId,
       salvo: tentativaId !== null,
+      modo,
       pontuacao: pontos,
       ...resultado,
       carreiras_sugeridas: await carreirasSugeridas(resultado.areas_empatadas),
