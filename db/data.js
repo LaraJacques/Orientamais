@@ -187,6 +187,150 @@ const perguntas = [
       humanas: 'Educando, aconselhando ou atuando em causas sociais',
     },
   },
+  {
+    texto: 'Num trabalho em grupo, você costuma assumir o papel de...',
+    opcoes: {
+      exatas: 'Quem resolve a parte técnica e os detalhes difíceis',
+      saude: 'Quem cuida do bem-estar e escuta o grupo',
+      criativas: 'Quem pensa na ideia visual e na apresentação',
+      negocios: 'Quem divide as tarefas e cobra os prazos',
+      humanas: 'Quem pesquisa o tema e escreve a argumentação',
+    },
+  },
+  {
+    texto: 'Qual destes conteúdos da internet você mais gosta de acompanhar?',
+    opcoes: {
+      exatas: 'Tecnologia, ciência e como as coisas funcionam',
+      saude: 'Saúde, bem-estar e comportamento humano',
+      criativas: 'Arte, design, música e cinema',
+      negocios: 'Negócios, finanças e empreendedorismo',
+      humanas: 'Política, história e questões sociais',
+    },
+  },
+  {
+    texto: 'Diante de um problema novo, sua primeira reação é...',
+    opcoes: {
+      exatas: 'Quebrar em partes e buscar uma solução lógica',
+      saude: 'Pensar em como isso afeta as pessoas envolvidas',
+      criativas: 'Imaginar uma forma diferente e original de resolver',
+      negocios: 'Avaliar custos, riscos e a melhor estratégia',
+      humanas: 'Entender o contexto e ouvir pontos de vista diferentes',
+    },
+  },
+  {
+    texto: 'Qual destas conquistas te deixaria mais orgulhoso(a)?',
+    opcoes: {
+      exatas: 'Criar algo que funciona e resolve um problema técnico',
+      saude: 'Ajudar alguém a se recuperar ou a se sentir melhor',
+      criativas: 'Ver uma obra ou ideia sua admirada por outras pessoas',
+      negocios: 'Ver um negócio ou projeto seu crescer e dar resultado',
+      humanas: 'Ajudar alguém a aprender ou a defender seus direitos',
+    },
+  },
+  {
+    texto: 'Em uma feira de profissões, você iria primeiro a...',
+    opcoes: {
+      exatas: 'O espaço de robótica, engenharia e tecnologia',
+      saude: 'O espaço de saúde e primeiros socorros',
+      criativas: 'A exposição de arte, fotografia ou design',
+      negocios: 'O estande de empreendedorismo e startups',
+      humanas: 'O debate, a biblioteca ou o espaço de história',
+    },
+  },
+  {
+    texto: 'Qual atividade você faria por horas sem perceber o tempo passar?',
+    opcoes: {
+      exatas: 'Programar, montar circuitos ou resolver desafios de lógica',
+      saude: 'Estudar o corpo humano ou cuidar de plantas e animais',
+      criativas: 'Desenhar, filmar, tocar ou escrever histórias',
+      negocios: 'Planejar um negócio ou administrar um jogo de estratégia',
+      humanas: 'Conversar sobre ideias, ler ou escrever sobre pessoas',
+    },
+  },
+  {
+    texto: 'Se a escola recebesse uma verba para um projeto, você investiria em...',
+    opcoes: {
+      exatas: 'Equipamentos e ferramentas tecnológicas',
+      saude: 'Uma campanha de saúde e cuidado com a comunidade',
+      criativas: 'Um espaço de arte, estúdio ou produção de conteúdo',
+      negocios: 'Uma feira de empreendedorismo ou uma empresa júnior',
+      humanas: 'Um ciclo de palestras, debates e rodas de conversa',
+    },
+  },
+  {
+    texto: 'Qual frase mais combina com você?',
+    opcoes: {
+      exatas: 'Gosto de entender como as coisas funcionam por dentro',
+      saude: 'Me sinto bem quando consigo cuidar dos outros',
+      criativas: 'Preciso expressar o que penso e sinto de forma criativa',
+      negocios: 'Gosto de desafios, metas e resultados concretos',
+      humanas: 'Acredito que ideias e educação mudam a sociedade',
+    },
+  },
+  {
+    texto: 'Em um filme ou série, qual personagem te inspira mais?',
+    opcoes: {
+      exatas: 'O(a) cientista ou engenheiro(a) que inventa a solução',
+      saude: 'O(a) médico(a) ou cuidador(a) dedicado(a)',
+      criativas: 'O(a) artista ou criador(a) fora do padrão',
+      negocios: 'O(a) empreendedor(a) ou líder que toma as decisões',
+      humanas: 'O(a) professor(a), advogado(a) ou ativista que luta por justiça',
+    },
+  },
+  {
+    texto: 'Qual destes ambientes de trabalho você prefere?',
+    opcoes: {
+      exatas: 'Um laboratório, oficina ou escritório de tecnologia',
+      saude: 'Um hospital, clínica ou centro comunitário',
+      criativas: 'Um estúdio, agência criativa ou ateliê',
+      negocios: 'Um escritório de negócios, banco ou empresa em crescimento',
+      humanas: 'Uma escola, tribunal, ONG ou instituição pública',
+    },
+  },
+  {
+    texto: 'Quando você precisa aprender algo novo, prefere...',
+    opcoes: {
+      exatas: 'Testar na prática, errar e ajustar até funcionar',
+      saude: 'Estudar casos reais e conversar com quem já viveu',
+      criativas: 'Ver exemplos visuais, vídeos e referências criativas',
+      negocios: 'Analisar números, resultados e exemplos de sucesso',
+      humanas: 'Ler, discutir e escrever sobre o assunto',
+    },
+  },
+  {
+    texto: 'Que tipo de notícia chama mais a sua atenção?',
+    opcoes: {
+      exatas: 'Uma nova tecnologia ou descoberta científica',
+      saude: 'Um avanço na medicina ou na saúde pública',
+      criativas: 'Um lançamento de arte, moda, jogo ou design',
+      negocios: 'Uma mudança na economia ou um negócio de sucesso',
+      humanas: 'Uma mudança em leis, educação ou direitos das pessoas',
+    },
+  },
+  {
+    texto: 'O que mais te motiva a escolher uma profissão?',
+    opcoes: {
+      exatas: 'Resolver problemas complexos com inteligência',
+      saude: 'Fazer diferença na vida das pessoas',
+      criativas: 'Ter liberdade para criar e se expressar',
+      negocios: 'Crescer, liderar e ter independência financeira',
+      humanas: 'Contribuir para uma sociedade mais justa e instruída',
+    },
+  },
+  {
+    texto: 'Em uma situação de conflito entre colegas, você tende a...',
+    opcoes: {
+      exatas: 'Analisar os fatos de forma objetiva e propor uma solução lógica',
+      saude: 'Acolher os dois lados e cuidar de quem está mais abalado',
+      criativas: 'Quebrar o clima com criatividade e bom humor',
+      negocios: 'Negociar e buscar um acordo que atenda a todos',
+      humanas: 'Mediar o diálogo e explicar o ponto de vista de cada um',
+    },
+  },
 ];
 
-module.exports = { areas, carreiras, cursos, perguntas };
+// Modos do teste (aninhados: o médio contém o rápido e o completo contém o médio).
+// A pergunta pertence ao modo pela sua ordem: ordem <= limite.
+const modosQuiz = { rapido: 6, medio: 15, completo: 20 };
+
+module.exports = { areas, carreiras, cursos, perguntas, modosQuiz };
