@@ -277,7 +277,8 @@ const ORCAMENTOS = [
 const state = {
   view: 'home',
   areas: [],
-  perguntas: null,          // carregadas da API
+  modo: null,               // 'rapido' | 'medio' | 'completo' (null = ainda não escolhido)
+  perguntas: null,          // carregadas da API (conforme o modo)
   quizStep: 0,
   respostas: [],            // [{pergunta_id, opcao_id}]
   resultado: null,          // resposta de POST /quiz/respostas
@@ -318,9 +319,9 @@ async function carregarAreas() {
   if (!state.areas.length) state.areas = (await api('/areas')).areas;
 }
 async function carregarPerguntas() {
-  if (state.perguntas) return;
+  if (state.perguntas || !state.modo) return;
   state.carregando = true; render();
-  state.perguntas = (await api('/quiz/perguntas')).perguntas;
+  state.perguntas = (await api('/quiz/perguntas?modo=' + state.modo)).perguntas;
 }
 async function carregarCarreiras() {
   if (state.carreiras) return;
@@ -405,7 +406,7 @@ function viewHome() {
   <section class="how">
     <h2 style="font-size:1.5rem;">Como funciona</h2>
     <div class="how-steps">
-      <div class="how-step"><div class="num">1</div><h3>Responda ao teste</h3><p>Seis perguntas rápidas sobre o que te move — nada de decorar disciplinas.</p></div>
+      <div class="how-step"><div class="num">1</div><h3>Responda ao teste</h3><p>Escolha um teste rápido (6 perguntas), médio (15) ou completo (20) sobre o que te move — nada de decorar disciplinas.</p></div>
       <div class="how-step"><div class="num">2</div><h3>Veja carreiras lado a lado</h3><p>Rotina do dia a dia, faixa salarial e como está o mercado.</p></div>
       <div class="how-step"><div class="num">3</div><h3>Encontre um curso que caiba no seu bolso</h3><p>Filtre por região e orçamento, ou deixe o Orienta+ ordenar pelo seu perfil.</p></div>
     </div>
@@ -416,8 +417,31 @@ function viewHome() {
   </section>`;
 }
 
+const MODOS_QUIZ = [
+  { id: 'rapido', nome: 'Rápido', n: 6, tempo: '~2 min', desc: 'Um panorama rápido dos seus interesses.' },
+  { id: 'medio', nome: 'Médio', n: 15, tempo: '~5 min', desc: 'Mais perguntas, resultado mais confiável.' },
+  { id: 'completo', nome: 'Completo', n: 20, tempo: '~7 min', desc: 'O mais detalhado, para quem quer ter mais certeza.' },
+];
+
+function viewEscolherModo() {
+  return `<section class="section-head"><h2>Teste vocacional</h2>
+    <p>Escolha o tamanho do teste. Quanto mais perguntas, mais preciso fica o seu perfil — mas todos funcionam e não existe resposta errada.</p>${avisoSessao()}</section>
+    <div class="quiz-card">
+      <div class="quiz-options">
+        ${MODOS_QUIZ.map((m) => `<button class="quiz-option" data-modo="${m.id}"><strong>${m.nome} · ${m.n} perguntas</strong> <span style="color:var(--ink-soft);">(${m.tempo})</span><br><span style="font-size:0.9rem;">${m.desc}</span></button>`).join('')}
+      </div>
+    </div>`;
+}
+
+function escolherModo(modo) {
+  state.modo = modo; state.perguntas = null; state.quizStep = 0; state.respostas = []; state.erro = null;
+  go('quiz');
+}
+
 function viewQuiz() {
   const cabecalho = `<section class="section-head"><h2>Teste vocacional</h2>`;
+  if (!state.modo) return viewEscolherModo();
+  if (state.perguntas && state.quizStep >= state.perguntas.length) { state.modo = null; state.perguntas = null; return viewEscolherModo(); }
   if (state.erro) return cabecalho + `</section>` + caixaErro();
   if (!state.perguntas) return cabecalho + `</section>` + caixaCarregando('Carregando perguntas...');
   const total = state.perguntas.length;
@@ -431,7 +455,7 @@ function viewQuiz() {
       <div class="quiz-options">
         ${p.opcoes.map((o) => `<button class="quiz-option" data-opcao="${o.id}">${esc(o.texto)}</button>`).join('')}
       </div>
-      ${state.quizStep > 0 ? `<p style="margin-top:18px;"><a href="#" data-voltar style="font-size:0.88rem;">← Voltar para a pergunta anterior</a></p>` : ''}
+      ${state.quizStep > 0 ? `<p style="margin-top:18px;"><a href="#" data-voltar style="font-size:0.88rem;">← Voltar para a pergunta anterior</a></p>` : `<p style="margin-top:18px;"><a href="#" data-trocar style="font-size:0.88rem;">← Trocar o tamanho do teste</a></p>`}
     </div>`;
 }
 
@@ -444,7 +468,7 @@ async function responderQuiz(opcaoId) {
   state.carregando = true; state.erro = null;
   document.getElementById('app').innerHTML = caixaCarregando('Calculando seu perfil...');
   try {
-    state.resultado = await api('/quiz/respostas', { metodo: 'POST', corpo: { respostas: state.respostas } });
+    state.resultado = await api('/quiz/respostas', { metodo: 'POST', corpo: { respostas: state.respostas, modo: state.modo } });
     state.filters.usarPerfil = true;
     await go('result');
   } catch (e) {
@@ -456,6 +480,7 @@ async function responderQuiz(opcaoId) {
 
 function refazerQuiz() {
   state.quizStep = 0; state.respostas = []; state.resultado = null;
+  state.modo = null; state.perguntas = null;
   state.filters.usarPerfil = false; state.cursos = null;
   go('quiz');
 }
@@ -597,7 +622,9 @@ function cartaoCurso(c) {
 /* ---------------- EVENTOS ---------------- */
 function attachHandlers() {
   const $$ = (s) => document.querySelectorAll(s);
-  $$('.quiz-option').forEach((b) => b.addEventListener('click', () => responderQuiz(b.dataset.opcao)));
+  $$('.quiz-option[data-opcao]').forEach((b) => b.addEventListener('click', () => responderQuiz(b.dataset.opcao)));
+  $$('[data-modo]').forEach((b) => b.addEventListener('click', () => escolherModo(b.dataset.modo)));
+  $$('[data-trocar]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); state.modo = null; state.perguntas = null; render(); }));
   $$('[data-voltar]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); state.quizStep--; render(); }));
   $$('[data-retry]').forEach((b) => b.addEventListener('click', () => go(state.view)));
   $$('[data-refazer]').forEach((b) => b.addEventListener('click', refazerQuiz));
